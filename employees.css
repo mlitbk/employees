@@ -1,0 +1,7 @@
+#employees-table td {
+    width: 200px;
+}
+
+#employees-table th {
+    text-align: center;
+}

@@ -1,7 +1,5 @@
 <?php
 
-require_once '/Users/michael/git/Faker/src/autoload.php';
-
 function employees_block_info() {
     $blocks['employees'] = array(
         'info' => t('Employee Contact Details'),
@@ -18,7 +16,7 @@ function employees_block_view($delta = '') {
             if(user_is_logged_in() && drupal_is_front_page()) {
                 $block['subject'] = t('Contact Details');
                 $form = drupal_get_form('employees_details_form');
-                $block['content'] = $form;
+                $block['content'] = drupal_render($form);
             }
     }
     return $block;
@@ -78,7 +76,7 @@ function employees_details_form_submit($form, &$form_state) {
 
 function employees_menu() {
     $items = array();
-    $items['employees/view'] = array(
+    $items['employees/list'] = array(
         'title' => 'View Employees',
         'page callback' => 'employees_view',
         'access arguments' => array('access administration pages'),
@@ -87,6 +85,8 @@ function employees_menu() {
 }
 
 function employees_view() {
+    drupal_add_css(drupal_get_path('module', 'employees') . '/employees.css');
+
     $header = array(
             array('data' => t('Name'), 'field' => 'name', 'sort' => 'asc'),
             array('data' => t('Email'), 'field' => 'email'),
@@ -99,20 +99,27 @@ function employees_view() {
     $rows = array();
 
     foreach($items as $emp) {
-            $rows[] = array($emp->ename, 
+            $rows[] = array(
+                    $emp->ename, 
                     l($emp->email,'mailto:'.$emp->email), 
-                    $emp->phone);
+                    $emp->phone
+            );
     }
 
     $page_array['employees_view'] = array(
         '#theme' => 'table',
         '#header' => $header,
         '#rows' => $rows,
-        '#attributes' => array('name' => 'sort-table'),
+        '#attributes' => array(
+            'name' => 'sort-table',
+            'id' => 'employees-table',
+        ),
+        '#empty' => t('No employees'),
     );
     $page_array['pager'] = array(
         '#theme' => 'pager',
     );
 
     return $page_array;
+
 }
