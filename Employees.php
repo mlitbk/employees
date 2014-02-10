@@ -148,7 +148,7 @@ class EmployeesList {
             ->limit($this->pager_limit)
             ->execute();
         foreach($result as $row) {
-            $emp = new Employee($row->name, $row->email, $row->phone);
+            $emp = new Employee($row->name, $row->phone, $row->email);
             $this->items[] = $emp;
         }
     }
