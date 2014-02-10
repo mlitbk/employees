@@ -1,0 +1,29 @@
+<?php
+function employees_schema() {
+    $schema['employees'] = array(
+        'fields' => array(
+            'eid' => array(
+                'type' => 'serial',
+                'unsigned' => TRUE,
+                'not null' => TRUE),
+            'name' => array(
+                'type' => 'varchar',
+                'length' => 40,
+                'not null' => TRUE,
+                'default' => ''),
+            'phone' => array(
+                'type' => 'varchar',
+                'length' => 20,
+                'not null' => TRUE,
+                'default' => ''),
+            'email' => array(
+                'type' => 'varchar',
+                'length' => 50,
+                'not null' => TRUE,
+                'default' => ''),
+        ),
+        'primary key' => array('eid'),
+    );
+    return $schema;
+}
+?>

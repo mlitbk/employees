@@ -1,0 +1,122 @@
+<?php
+
+require_once '/Users/michael/git/Faker/src/autoload.php';
+
+function employees_block_info() {
+    $blocks['employees'] = array(
+        'info' => t('Employee Contact Details'),
+        'cache' => DRUPAL_CACHE_PER_ROLE,
+    );
+    return $blocks;
+}
+
+function employees_block_view($delta = '') {
+    $block = array();
+
+    switch($delta) {
+        case 'employees':
+            if(user_is_logged_in() && drupal_is_front_page()) {
+                $block['subject'] = t('Contact Details');
+                $form = drupal_get_form('employees_details_form');
+                $block['content'] = $form;
+            }
+    }
+    return $block;
+
+}
+
+function employees_details_form($form, &$form_state) {
+    $form['name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#size' => 30,
+        '#required' => TRUE,
+    );
+    $form['phone'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Phone Number'),
+        '#size' => 30,
+        '#required' => TRUE,
+    );
+    $form['email'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Email Address'),
+        '#size' => 30,
+        '#required' => TRUE,
+    );
+    $form['actions'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save'),
+    );
+    return $form;
+}
+
+function employees_details_form_validate($form, &$form_state) {
+    $email = $form_state['values']['email'];
+    $phone = $form_state['values']['phone'];
+
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        form_set_error('employees_invalid_email', t('The email address you entered is not valid.'));
+    }
+
+    if(preg_match("/[^\d-x\(\)\.\+]/",$phone)) {
+        form_set_error('employees_invalid_phone', t('The phone number you entered is not valid.'));
+    }
+}
+
+function employees_details_form_submit($form, &$form_state) {
+    $fields = array('name' => $form_state['values']['name'],'phone' => $form_state['values']['phone'],'email' => $form_state['values']['email']);
+    db_insert('employees')->fields($fields)->execute();
+
+    drupal_set_message(t('Your form has been saved.'));
+}
+
+function employees_menu() {
+    $items = array();
+    $items['employees/view'] = array(
+        'title' => 'View Employees',
+        'page callback' => 'employees_view',
+        'access arguments' => array('access administration pages'),
+    );
+    return $items;
+}
+
+function employees_view() {
+    $header = array(
+            array('data' => t('Name'), 'field' => 'name', 'sort' => 'asc'),
+            array('data' => t('Email'), 'field' => 'email'),
+            array('data' => t('Phone Number'), 'field' => 'phone')
+    );
+
+    $result = retrieve_employees($header);
+    $rows = array();
+
+    foreach($result as $node) {
+            $rows[] = array($node->name, 
+                    l($node->email,'mailto:'.$node->email), 
+                    $node->phone);
+    }
+
+    $page_array['employees_view'] = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+        '#attributes' => array('name' => 'sort-table'),
+    );
+    $page_array['pager'] = array(
+        '#theme' => 'pager',
+    );
+
+    return $page_array;
+}
+
+function retrieve_employees($header) {
+    $query = db_select('employees', 'e')
+        ->fields('e', array('name', 'phone', 'email'))
+        ->extend('TableSort')
+        ->orderByHeader($header)
+        ->extend('PagerDefault')
+        ->limit(10)
+        ->execute();
+    return $query;
+}
