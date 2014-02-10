@@ -1,5 +1,5 @@
 name = Employee Manager
-description = A description of employee manager module.
+description = Employee contact details form 
 core = 7.x
 
 files[] = employees.module

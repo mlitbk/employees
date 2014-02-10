@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * class Employee
+ */
 class Employee {
     public $ename = "";
     public $email = "";
@@ -7,12 +10,21 @@ class Employee {
 
     private $table_name = 'employees';
 
+    /**
+     * Initialize an employee
+     * @param name The name of the employee
+     * @param email Email address
+     * @param phone Phone number
+     */
     function __construct($name, $email, $phone) {
         $this->ename = $name;
         $this->email = $email;
         $this->phone = $phone;    
     }
 
+    /**
+     * Save the employee in database
+     */
     public function save() {
         $fields = array(
             'name' => $this->ename,
@@ -24,12 +36,22 @@ class Employee {
             ->execute();
     }
 
+    /**
+     * Check if an email is valid
+     * @param email The email to check
+     * returns true if email is valid
+     */
     public static function is_valid_email($email) {
         if(filter_var($email, FILTER_VALIDATE_EMAIL))
             return true;
         return false;
     }
 
+    /**
+     * Check if a phone number is valid
+     * @param phone The phone number to check
+     * returns true if the phone is valid
+     */
     public static function is_valid_phone($phone) {
         if(preg_match("/[^\d-x\(\)\.\+]/",$phone))
             return false;
@@ -37,26 +59,57 @@ class Employee {
     }
 }
 
+/**
+ * class EmployeesList
+ * A list of employees to be shown
+ * in a table
+ */
 class EmployeesList {
     private $items = array();
 
+    /**
+     * How many employees to show per page
+     */
     private $pager_limit = 10;
 
+    /**
+     * Fields in database to select
+     */
     private $fields = array('name', 'phone', 'email');
 
+    /**
+     * The header of the table in which we
+     * show the list
+     */
     private $header;
 
+    /**
+     * Table name in database in which
+     * the employees are stored
+     */
     private $table_name = 'employees';
 
+    /**
+     * Initialize an employee list
+     * @param header The header of the table
+     * in which the employees are shown
+     */
     function __construct($header) {
         $this->header = $header;
         $this->retrieve_employees();
     }
 
+    /**
+     * returns array of employees
+     */
     public function get_items() {
         return $this->items;
     }
 
+    /**
+     * Retrieve employees from the database
+     * and save in array
+     */
     private function retrieve_employees() {
         $result = db_select('employees', 'e')
             ->fields('e', $this->fields)

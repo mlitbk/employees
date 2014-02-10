@@ -1,13 +1,28 @@
 <?php
+/**
+ * @file employees.module
+ * A module that shows contact details form
+ * for employees
+ */
 
+/**
+ * Implements hook_block_info
+ */
 function employees_block_info() {
     $blocks['employees'] = array(
-        'info' => t('Employee Contact Details'),
+        'info' => t('Employee contact details form'),
         'cache' => DRUPAL_CACHE_PER_ROLE,
     );
     return $blocks;
 }
 
+/**
+ * Implements hook_block_view
+ *
+ * @returns block containing the contact details
+ * form, or an empty array in case we shouldn't
+ * show the form
+ */
 function employees_block_view($delta = '') {
     $block = array();
 
@@ -23,6 +38,9 @@ function employees_block_view($delta = '') {
 
 }
 
+/**
+ * Creates the contact details form
+ */
 function employees_details_form($form, &$form_state) {
     $form['name'] = array(
         '#type' => 'textfield',
@@ -49,6 +67,12 @@ function employees_details_form($form, &$form_state) {
     return $form;
 }
 
+/**
+ * Implements form_validate
+ *
+ * raises an error if one of the fields
+ * is not valid
+ */
 function employees_details_form_validate($form, &$form_state) {
     $email = $form_state['values']['email'];
     $phone = $form_state['values']['phone'];
@@ -62,6 +86,11 @@ function employees_details_form_validate($form, &$form_state) {
     }
 }
 
+/**
+ * Implements form_submit
+ *
+ * Create a new employee and save in database
+ */
 function employees_details_form_submit($form, &$form_state) {
     $emp = new Employee(
             $form_state['values']['name'],
@@ -74,16 +103,24 @@ function employees_details_form_submit($form, &$form_state) {
     drupal_set_message(t('Your form has been saved.'));
 }
 
+/**
+ * Implements hook_menu
+ *
+ * Add employee list link to menu
+ */
 function employees_menu() {
     $items = array();
     $items['employees/list'] = array(
-        'title' => 'View Employees',
+        'title' => 'Employees List',
         'page callback' => 'employees_view',
         'access arguments' => array('access administration pages'),
     );
     return $items;
 }
 
+/**
+ * Create the view for the employee list page
+ */
 function employees_view() {
     drupal_add_css(drupal_get_path('module', 'employees') . '/employees.css');
 
