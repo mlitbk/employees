@@ -55,18 +55,23 @@ function employees_details_form_validate($form, &$form_state) {
     $email = $form_state['values']['email'];
     $phone = $form_state['values']['phone'];
 
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if(!Employee::is_valid_email($email)) {
         form_set_error('employees_invalid_email', t('The email address you entered is not valid.'));
     }
 
-    if(preg_match("/[^\d-x\(\)\.\+]/",$phone)) {
+    if(!Employee::is_valid_phone($phone)) {
         form_set_error('employees_invalid_phone', t('The phone number you entered is not valid.'));
     }
 }
 
 function employees_details_form_submit($form, &$form_state) {
-    $fields = array('name' => $form_state['values']['name'],'phone' => $form_state['values']['phone'],'email' => $form_state['values']['email']);
-    db_insert('employees')->fields($fields)->execute();
+    $emp = new Employee(
+            $form_state['values']['name'],
+            $form_state['values']['phone'],
+            $form_state['values']['email']
+    );
+
+    $emp->save();
 
     drupal_set_message(t('Your form has been saved.'));
 }
@@ -88,13 +93,15 @@ function employees_view() {
             array('data' => t('Phone Number'), 'field' => 'phone')
     );
 
-    $result = retrieve_employees($header);
+    $list = new EmployeesList($header);
+    $items = $list->get_items();
+
     $rows = array();
 
-    foreach($result as $node) {
-            $rows[] = array($node->name, 
-                    l($node->email,'mailto:'.$node->email), 
-                    $node->phone);
+    foreach($items as $emp) {
+            $rows[] = array($emp->ename, 
+                    l($emp->email,'mailto:'.$emp->email), 
+                    $emp->phone);
     }
 
     $page_array['employees_view'] = array(
@@ -108,15 +115,4 @@ function employees_view() {
     );
 
     return $page_array;
-}
-
-function retrieve_employees($header) {
-    $query = db_select('employees', 'e')
-        ->fields('e', array('name', 'phone', 'email'))
-        ->extend('TableSort')
-        ->orderByHeader($header)
-        ->extend('PagerDefault')
-        ->limit(10)
-        ->execute();
-    return $query;
 }

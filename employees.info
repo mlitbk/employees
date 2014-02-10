@@ -1,3 +1,8 @@
 name = Employee Manager
 description = A description of employee manager module.
 core = 7.x
+
+files[] = employees.module
+files[] = employees.install
+
+files[] = Employees.php
