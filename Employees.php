@@ -10,13 +10,17 @@ class Employee {
 
     private $table_name = 'employees';
 
+    private static $name_max_length = 40;
+    private static $phone_max_length = 20;
+    private static $email_max_length = 50;
+
     /**
      * Initialize an employee
      * @param name The name of the employee
      * @param email Email address
      * @param phone Phone number
      */
-    function __construct($name, $email, $phone) {
+    function __construct($name, $phone, $email) {
         $this->ename = $name;
         $this->email = $email;
         $this->phone = $phone;    
@@ -28,12 +32,21 @@ class Employee {
     public function save() {
         $fields = array(
             'name' => $this->ename,
-            'phone' => $this->phone,
-            'email' => $this->email
+            'email' => $this->email,
+            'phone' => $this->phone
         );
         db_insert($this->table_name)
             ->fields($fields)
             ->execute();
+    }
+
+    public static function is_valid_name($name) {
+        $valid = true;
+
+        if(strlen($name) > self::$name_max_length)
+            $valid = false;
+
+        return $valid;    
     }
 
     /**
@@ -42,9 +55,15 @@ class Employee {
      * returns true if email is valid
      */
     public static function is_valid_email($email) {
-        if(filter_var($email, FILTER_VALIDATE_EMAIL))
-            return true;
-        return false;
+        $valid = true;
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+            $valid = false;
+        
+        if(strlen($email) > self::$email_max_length)
+            $valid = false;
+
+        return $valid;
     }
 
     /**
@@ -53,9 +72,19 @@ class Employee {
      * returns true if the phone is valid
      */
     public static function is_valid_phone($phone) {
+        $valid = true;
+
+        /** 
+         * Check if phone number contains
+         * illegal characters
+         */
         if(preg_match("/[^\d-x\(\)\.\+]/",$phone))
-            return false;
-        return true;
+            $valid = false;
+
+        if(strlen($phone) > self::$phone_max_length)
+            $valid = false;
+        
+        return $valid;
     }
 }
 
