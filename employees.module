@@ -79,15 +79,15 @@ function employees_details_form_validate($form, &$form_state) {
     $phone = $form_state['values']['phone'];
 
     if(!Employee::is_valid_name($name)) {
-        form_set_error('employees_invalid_name', t('The name you entered is not valid.'));
+        form_set_error('name', t('The name you entered is not valid.'));
     }
 
     if(!Employee::is_valid_email($email)) {
-        form_set_error('employees_invalid_email', t('The email address you entered is not valid.'));
+        form_set_error('email', t('The email address you entered is not valid.'));
     }
 
     if(!Employee::is_valid_phone($phone)) {
-        form_set_error('employees_invalid_phone', t('The phone number you entered is not valid.'));
+        form_set_error('phone', t('The phone number you entered is not valid.'));
     }
 }
 
